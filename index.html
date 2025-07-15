@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agents Interactive Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb; /* gray-50 */
+            color: #111827; /* gray-900 */
+        }
+        .tab-active {
+            border-bottom-color: #2563eb; /* blue-600 */
+            color: #2563eb;
+        }
+        .tab-inactive {
+            border-bottom-color: transparent;
+            color: #4b5563; /* gray-600 */
+        }
+        .loader {
+            border: 4px solid #e5e7eb; /* gray-200 */
+            border-top: 4px solid #2563eb; /* blue-600 */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        pre {
+            background-color: #1f2937; /* gray-800 */
+            color: #f9fafb; /* gray-50 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            position: relative;
+        }
+        pre code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] summary .arrow {
+            transform: rotate(90deg);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #4b5563;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="pt-16 flex flex-col min-h-screen">
+    <!-- Header Banner -->
+    <div class="fixed top-0 left-0 right-0 bg-gray-800 text-white shadow-md z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-12">
+                <div class="flex items-center">
+                    <span class="font-bold">Solutions by Haissam</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-7xl mx-auto flex-grow px-4 sm:px-6 lg:px-8">
+        <header class="text-center mb-10 mt-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">A Practical Guide to Building Agents</h1>
+            <p class="text-lg mt-2 text-gray-600">Synthesizing insights from OpenAI & Google guides on building AI Agents.</p>
+        </header>
+
+        <!-- Tabs -->
+        <div class="mb-8 border-b border-gray-200">
+            <nav class="flex flex-wrap justify-center -mb-px space-x-6 md:space-x-8">
+                <button class="tab tab-active font-semibold py-4 px-1 border-b-2 transition-colors duration-300" onclick="showTab('components')">Core Components</button>
+                <button class="tab tab-inactive font-semibold py-4 px-1 border-b-2 transition-colors duration-300" onclick="showTab('tools')">Tools Deep-Dive</button>
+                <button class="tab tab-inactive font-semibold py-4 px-1 border-b-2 transition-colors duration-300" onclick="showTab('orchestration')">Orchestration</button>
+                <button class="tab tab-inactive font-semibold py-4 px-1 border-b-2 transition-colors duration-300" onclick="showTab('guardrails')">Guardrails</button>
+                <button class="tab tab-inactive font-semibold py-4 px-1 border-b-2 transition-colors duration-300" onclick="showTab('learning')">🎓 Learning Center</button>
+                <button class="tab tab-inactive font-semibold py-4 px-1 border-b-2 transition-colors duration-300" onclick="showTab('designer')">✨ Agent Designer</button>
+            </nav>
+        </div>
+
+        <!-- Content -->
+        <main id="dashboard-content">
+            <!-- Core Components Tab -->
+            <div id="components" class="tab-content">
+                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    <div class="lg:col-span-3 bg-white p-6 border border-gray-200 rounded-xl shadow-sm">
+                        <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Agent Foundations</h2>
+                        <div class="flex flex-col items-center justify-center p-4 rounded-lg space-y-6">
+                            <div class="w-full max-w-sm bg-white p-4 border-2 border-blue-500 rounded-2xl">
+                                <h3 class="text-center font-bold text-lg mb-3 text-blue-800">Agent</h3>
+                                <div class="space-y-3">
+                                    <div id="model-box" class="p-3 bg-pink-100 border border-pink-300 rounded-lg cursor-pointer hover:shadow-md transition-shadow" onclick="showInfo('model')">
+                                        <h4 class="font-bold text-pink-800">01. Model</h4>
+                                        <p class="text-xs text-pink-700">The LLM powering reasoning and decisions.</p>
+                                    </div>
+                                    <div id="tools-box" class="p-3 bg-purple-100 border border-purple-300 rounded-lg cursor-pointer hover:shadow-md transition-shadow" onclick="showInfo('tools')">
+                                        <h4 class="font-bold text-purple-800">02. Tools</h4>
+                                        <p class="text-xs text-purple-700">External functions or APIs the agent can use.</p>
+                                    </div>
+                                    <div id="instructions-box" class="p-3 bg-green-100 border border-green-300 rounded-lg cursor-pointer hover:shadow-md transition-shadow" onclick="showInfo('instructions')">
+                                        <h4 class="font-bold text-green-800">03. Instructions</h4>
+                                        <p class="text-xs text-green-700">Guidelines and guardrails for behavior.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="info-panel" class="lg:col-span-2 bg-white p-6 border border-gray-200 rounded-xl shadow-sm h-full">
+                        <h3 class="text-xl font-bold mb-4 text-gray-800">Component Details</h3>
+                        <div id="info-text" class="text-gray-600 space-y-2">Click on a component in the diagram to see details here.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools Deep-Dive Tab -->
+            <div id="tools" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow flex flex-col">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">Data Tools</h3>
+                        <p class="mt-2 text-gray-600 flex-grow">Enable agents to retrieve context and information necessary for executing the workflow.</p>
+                        <p class="font-semibold mt-4">Examples:</p>
+                        <ul class="list-disc list-inside text-sm mt-2 space-y-1 text-gray-500">
+                            <li>Query transaction databases</li>
+                            <li>Read PDF documents</li>
+                            <li>Search the web</li>
+                        </ul>
+                        <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg mt-6 w-full hover:bg-blue-700 transition-colors" onclick="generateUseCase('Data Tools', this)">✨ Generate Use Case</button>
+                        <div class="use-case-output mt-4 text-sm p-3 bg-gray-50 border rounded-lg hidden"></div>
+                    </div>
+                    <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow flex flex-col">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">Action Tools</h3>
+                        <p class="mt-2 text-gray-600 flex-grow">Enable agents to interact with systems to take actions such as adding new information to databases, updating records, or sending messages.</p>
+                         <p class="font-semibold mt-4">Examples:</p>
+                        <ul class="list-disc list-inside text-sm mt-2 space-y-1 text-gray-500">
+                            <li>Send emails and texts</li>
+                            <li>Update a CRM record</li>
+                            <li>Handoff a ticket to a human</li>
+                        </ul>
+                        <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg mt-6 w-full hover:bg-blue-700 transition-colors" onclick="generateUseCase('Action Tools', this)">✨ Generate Use Case</button>
+                        <div class="use-case-output mt-4 text-sm p-3 bg-gray-50 border rounded-lg hidden"></div>
+                    </div>
+                    <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow flex flex-col">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">Orchestration Tools</h3>
+                        <p class="mt-2 text-gray-600 flex-grow">Agents themselves can serve as tools for other agents, enabling complex, multi-agent systems.</p>
+                         <p class="font-semibold mt-4">Examples:</p>
+                        <ul class="list-disc list-inside text-sm mt-2 space-y-1 text-gray-500">
+                            <li>A "Refund Agent" tool</li>
+                            <li>A "Research Agent" tool</li>
+                            <li>A "Writing Agent" tool</li>
+                        </ul>
+                        <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg mt-6 w-full hover:bg-blue-700 transition-colors" onclick="generateUseCase('Orchestration Tools', this)">✨ Generate Use Case</button>
+                        <div class="use-case-output mt-4 text-sm p-3 bg-gray-50 border rounded-lg hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orchestration Tab -->
+            <div id="orchestration" class="tab-content hidden">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm text-center hover:shadow-lg transition-shadow">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">Manager Pattern</h3>
+                        <p class="text-gray-600 mb-4">A central "manager" agent coordinates multiple specialized agents via tool calls.</p>
+                        <img src="https://placehold.co/600x300/e2e8f0/4a5568?text=Manager+→+[Task]+→+Specialist" alt="Manager Pattern Diagram" class="w-full rounded-lg">
+                    </div>
+                    <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm text-center hover:shadow-lg transition-shadow">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">Decentralized Pattern</h3>
+                        <p class="text-gray-600 mb-4">Multiple agents operate as peers, handing off tasks to one another based on their specializations.</p>
+                        <img src="https://placehold.co/600x300/e2e8f0/4a5568?text=Triage+→+Orders" alt="Decentralized Pattern Diagram" class="w-full rounded-lg">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guardrails Tab -->
+            <div id="guardrails" class="tab-content hidden">
+                <div class="bg-white p-8 border border-gray-200 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-gray-800">Guardrails</h2>
+                    <p class="text-center text-gray-600 mb-8">A layered defense mechanism to ensure agents operate safely and predictably.</p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>Relevance Classifier</strong><p class="text-xs text-gray-500">Flags off-topic queries.</p></div>
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>Safety Classifier</strong><p class="text-xs text-gray-500">Detects unsafe inputs like jailbreaks.</p></div>
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>PII Filter</strong><p class="text-xs text-gray-500">Vets output for personal info.</p></div>
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>Moderation</strong><p class="text-xs text-gray-500">Flags harmful/inappropriate content.</p></div>
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>Tool Safeguards</strong><p class="text-xs text-gray-500">Assess risk of each tool.</p></div>
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>Rules-based</strong><p class="text-xs text-gray-500">Blocklists, regex, length limits.</p></div>
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>Output Validation</strong><p class="text-xs text-gray-500">Ensures brand alignment.</p></div>
+                        <div class="p-4 bg-gray-100 rounded-lg text-center"><strong>Human Intervention</strong><p class="text-xs text-gray-500">Escalates to a human when needed.</p></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Learning Center Tab -->
+            <div id="learning" class="tab-content hidden">
+                <div class="bg-white p-8 border border-gray-200 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-2 text-center text-gray-800">🎓 Learning Center</h2>
+                    <p class="text-center text-gray-600 mb-8">Key concepts from the "Introducing agentic AI" course.</p>
+                    <div class="space-y-4">
+                        <details class="group bg-gray-50 p-4 rounded-lg">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer">
+                                What is Agentic AI?
+                                <span class="arrow transition-transform duration-200">▶</span>
+                            </summary>
+                            <div class="mt-4 text-gray-600 space-y-3">
+                                <p>Agentic AI refers to AI systems, or "agents," that can perform tasks, make decisions, and take actions autonomously, without direct human instruction for each step. Unlike tools that need a prompt to do something (like writing an email), agents work on our behalf to achieve a goal, figuring out the steps themselves.</p>
+                                <p><strong>Analogy:</strong> Think of the difference between a simple calculator and an expert human accountant. The calculator (like traditional AI) needs you to input every single calculation. The accountant (the AI agent) understands your high-level goal—like "minimize my taxes"—and independently executes all the necessary steps, from gathering documents to filing forms, without you telling them exactly what to do at each stage.</p>
+                            </div>
+                        </details>
+                        <details class="group bg-gray-50 p-4 rounded-lg">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer">
+                                Key Characteristics of AI Agents
+                                <span class="arrow transition-transform duration-200">▶</span>
+                            </summary>
+                            <div class="mt-4 text-gray-600">
+                                <ul class="list-disc list-inside space-y-3">
+                                    <li><strong>Autonomy:</strong> They operate independently without constant human intervention. <br><em class="text-sm text-gray-500">Example: A marketing agent that adjusts ad spend across platforms in real-time based on performance, without needing a manager's approval for every change.</em></li>
+                                    <li><strong>Adaptability:</strong> They learn and modify their behavior based on new data or changing situations. <br><em class="text-sm text-gray-500">Example: A supply chain agent that reroutes shipments automatically when it detects a weather disruption or port closure.</em></li>
+                                    <li><strong>Interaction:</strong> They interact with their environment, other agents, and users through various interfaces. <br><em class="text-sm text-gray-500">Example: A customer service agent that can understand a user's typed query, access their order history from a database, and send a confirmation email.</em></li>
+                                    <li><strong>Goal-Oriented:</strong> They are designed to achieve specific objectives, from simple tasks to complex problem-solving. <br><em class="text-sm text-gray-500">Example: A personal finance agent whose goal is to save the user $100 per month by analyzing spending and suggesting budget cuts.</em></li>
+                                </ul>
+                            </div>
+                        </details>
+                         <details class="group bg-gray-50 p-4 rounded-lg">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer">
+                                How Smart Agents Work (Example: AI Travel Agent)
+                                <span class="arrow transition-transform duration-200">▶</span>
+                            </summary>
+                            <div class="mt-4 text-gray-600">
+                                <ol class="list-decimal list-inside space-y-2">
+                                    <li><strong>Set a Goal:</strong> The agent is given a complex goal, like "plan a week-long family vacation to Hawaii."</li>
+                                    <li><strong>Plan Tasks:</strong> It breaks the goal down into smaller, manageable tasks (e.g., book flights, find hotel, plan activities) and prioritizes them.</li>
+                                    <li><strong>Gather Information:</strong> The agent collects data by asking questions, accessing databases, or searching online to understand preferences and options.</li>
+                                    <li><strong>Refine and Adapt:</strong> As it gathers information, it might change its plan. For example, if a desired activity is only available on a specific day, it will adjust the flight bookings accordingly.</li>
+                                    <li><strong>Deliver/Execute:</strong> The agent presents a complete itinerary. If trusted, it can also execute the plan: booking flights, making reservations, and buying tickets.</li>
+                                    <li><strong>Learn from Interaction:</strong> Over time, the agent learns your preferences (e.g., you like aisle seats) and improves its future recommendations, making the process more efficient.</li>
+                                </ol>
+                                <div class="mt-4 p-3 bg-blue-100 border border-blue-200 rounded-lg">
+                                    <p class="font-semibold text-blue-800">Key Takeaway:</p>
+                                    <p class="text-sm text-blue-700">Smart agents operate in a continuous loop: <strong>Plan → Act → Observe → Refine</strong>. This allows them to tackle complex, multi-step problems that change over time.</p>
+                                </div>
+                            </div>
+                        </details>
+                        <details class="group bg-gray-50 p-4 rounded-lg">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer">
+                                The 6 Types of AI Agents
+                                <span class="arrow transition-transform duration-200">▶</span>
+                            </summary>
+                            <div class="mt-4 text-gray-600 space-y-4">
+                                <div><p><strong>1. Simple Reflex Agents:</strong> Act only based on the current situation using predefined rules. They have no memory.</p><p class="text-sm text-blue-600"><em>Best for: Simple, repetitive tasks like password resets or answering basic FAQs.</em></p></div>
+                                <div><p><strong>2. Model-Based Agents:</strong> Maintain an internal "model" of the world to handle situations that aren't immediately observable. They can plan and predict outcomes.</p><p class="text-sm text-blue-600"><em>Best for: Tasks requiring short-term planning, like a robot vacuum mapping a room to clean it efficiently.</em></p></div>
+                                <div><p><strong>3. Goal-Based Agents:</strong> Go a step further by having explicit goal information. They choose actions that will help them achieve their goal.</p><p class="text-sm text-blue-600"><em>Best for: Problems with a clear objective, like a supply chain agent whose goal is to maintain a certain inventory level.</em></p></div>
+                                <div><p><strong>4. Utility-Based Agents:</strong> Choose actions that maximize "utility" or happiness. They can weigh trade-offs between conflicting goals.</p><p class="text-sm text-blue-600"><em>Best for: Optimization problems, like a marketing agent allocating a budget to get the highest return on investment.</em></p></div>
+                                <div><p><strong>5. Learning-Based Agents:</strong> Can learn from their experiences and improve their performance over time through techniques like reinforcement learning.</p><p class="text-sm text-blue-600"><em>Best for: Dynamic environments where the optimal strategy is unknown, like fraud detection or personalized recommendation engines.</em></p></div>
+                                <div><p><strong>6. Hierarchical Agents:</strong> A system of agents organized in a hierarchy. High-level agents break down complex problems and delegate tasks to lower-level, specialized agents.</p><p class="text-sm text-blue-600"><em>Best for: Extremely complex, multi-domain problems, like managing an entire company's operations from sales to support.</em></p></div>
+                            </div>
+                        </details>
+                        <details class="group bg-gray-50 p-4 rounded-lg">
+                            <summary class="flex justify-between items-center font-semibold cursor-pointer">
+                                The Pyramid of Trust
+                                <span class="arrow transition-transform duration-200">▶</span>
+                            </summary>
+                            <div class="mt-4 text-gray-600">
+                                <p>Building trust in AI agents is essential for their adoption. This can be viewed as a pyramid of needs, where foundational needs must be met before moving to higher levels:</p>
+                                <ol class="list-decimal list-inside space-y-3 mt-3">
+                                    <li><strong>(Base) Safety, Security, & Privacy:</strong> Agents must comply with existing policies for data handling and security.<br><em class="text-sm text-gray-500">Why it matters: If an agent leaks private data or can be easily hacked, no one will use it, regardless of how effective it is.</em></li>
+                                    <li><strong>Fairness, Quality, & Accuracy:</strong> Agents must be designed to avoid bias and deliver high-quality, accurate results.<br><em class="text-sm text-gray-500">Why it matters: An agent that produces biased or incorrect results can damage brand reputation and lead to poor business outcomes.</em></li>
+                                    <li><strong>Accountability:</strong> There must be structures to hold the agent accountable and explain its decisions when things go wrong.<br><em class="text-sm text-gray-500">Why it matters: Without accountability, we can't diagnose mistakes or be confident that the agent will improve over time.</em></li>
+                                    <li><strong>(Top) Transparency:</strong> There should be clarity on when and how AI agents are being used, to the extent that it builds (and doesn't hinder) user trust.<br><em class="text-sm text-gray-500">Why it matters: Hiding the use of an agent can erode trust if discovered, making users feel deceived. Appropriate transparency builds a stronger human-AI relationship.</em></li>
+                                </ol>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Designer Tab -->
+            <div id="designer" class="tab-content hidden">
+                <div class="bg-white p-8 border border-gray-200 rounded-xl shadow-sm">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">✨ Agent Designer</h2>
+                    <p class="text-center text-gray-600 mb-6">Describe a problem, and let Gemini design a high-level agent architecture for you.</p>
+                    <div class="flex flex-col items-center">
+                        <textarea id="problem-description" class="w-full max-w-2xl h-24 p-3 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="e.g., 'Build an agent to handle customer service refund requests.'"></textarea>
+                        <button id="design-agent-btn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg mt-4 hover:bg-blue-700 transition-colors">Design My Agent</button>
+                    </div>
+                    <div id="agent-design-output-container" class="mt-8 w-full max-w-4xl mx-auto hidden">
+                        <div id="agent-design-output" class="p-4 bg-gray-50 border rounded-lg whitespace-pre-wrap text-gray-700"></div>
+                        <div id="action-buttons" class="flex justify-center space-x-4 mt-4">
+                             <button id="generate-code-btn" class="hidden bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">✨ Generate Starter Code</button>
+                        </div>
+                        <div id="starter-code-output" class="mt-4 hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer class="text-center p-4 mt-8 text-sm text-gray-500">
+        <p>Developed with Gemini</p>
+        <p>Prepared by Haissam - engr.haissam@gmail.com</p>
+    </footer>
+
+    <script>
+        // --- DOM Element Selection ---
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const infoPanel = document.getElementById('info-panel');
+        const infoText = document.getElementById('info-text');
+        const designAgentBtn = document.getElementById('design-agent-btn');
+        const problemDescription = document.getElementById('problem-description');
+        const agentDesignOutputContainer = document.getElementById('agent-design-output-container');
+        const agentDesignOutput = document.getElementById('agent-design-output');
+        const generateCodeBtn = document.getElementById('generate-code-btn');
+        const starterCodeOutput = document.getElementById('starter-code-output');
+        const actionButtonsContainer = document.getElementById('action-buttons');
+
+        // --- Static Content ---
+        const infoContent = {
+            model: {
+                title: "01. Model",
+                text: "The LLM powering the agent's reasoning and decision-making. The guide recommends starting with the most capable model to set a baseline, then optimizing for cost and latency."
+            },
+            tools: {
+                title: "02. Tools",
+                text: "External functions or APIs the agent can use to take action. The guide categorizes them into Data, Action, and Orchestration tools."
+            },
+            instructions: {
+                title: "03. Instructions",
+                text: "Explicit guidelines and guardrails defining how the agent behaves. The guide emphasizes using existing documents, breaking down tasks, defining clear actions, and capturing edge cases."
+            }
+        };
+
+        // --- Functions ---
+
+        /**
+         * Switches the visible tab in the main content area.
+         * @param {string} tabName - The ID of the tab content to show.
+         */
+        function showTab(tabName) {
+            tabs.forEach(tab => {
+                const isActive = tab.getAttribute('onclick') === `showTab('${tabName}')`;
+                tab.classList.toggle('tab-active', isActive);
+                tab.classList.toggle('tab-inactive', !isActive);
+            });
+            
+            tabContents.forEach(content => {
+                content.classList.toggle('hidden', content.id !== tabName);
+            });
+        }
+
+        /**
+         * Displays details for a selected component in the info panel.
+         * @param {string} componentName - The key for the component in infoContent.
+         */
+        function showInfo(componentName) {
+            const content = infoContent[componentName];
+            if (content) {
+                infoText.innerHTML = `<h3 class="text-xl font-bold mb-2 text-blue-700">${content.title}</h3><p>${content.text}</p>`;
+            }
+            
+            document.querySelectorAll('[id$="-box"]').forEach(el => el.classList.remove('ring-4', 'ring-blue-400'));
+            const elementToHighlight = document.getElementById(`${componentName}-box`);
+            if (elementToHighlight) {
+                 elementToHighlight.classList.add('ring-4', 'ring-blue-400');
+            }
+        }
+        
+        /**
+         * Calls the Gemini API to generate content based on a prompt.
+         * @param {string} prompt - The prompt to send to the Gemini API.
+         * @returns {Promise<string>} - The generated text from the model.
+         */
+        async function callGemini(prompt) {
+            const apiKey = ""; // API key will be injected by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API call failed with status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].finishReason) {
+                         return `Sorry, the response was blocked. Reason: ${result.candidates[0].finishReason}`;
+                    }
+                    return "Sorry, I couldn't generate a response. The model's output was empty.";
+                }
+            } catch (error) {
+                console.error("Gemini API call error:", error);
+                return `Error: Could not connect to the Gemini API. ${error.message}`;
+            }
+        }
+
+        /**
+         * Generates and displays a use case for a given tool type.
+         * @param {string} toolType - The type of tool (e.g., 'Data Tools').
+         * @param {HTMLElement} buttonElement - The button that was clicked.
+         */
+        async function generateUseCase(toolType, buttonElement) {
+            const outputDiv = buttonElement.nextElementSibling;
+            outputDiv.classList.remove('hidden');
+            outputDiv.innerHTML = '<div class="flex items-center justify-center"><div class="loader"></div><span class="ml-2 text-gray-600">Generating...</span></div>';
+
+            const prompt = `Based on the OpenAI "A practical guide to building agents", generate a creative and specific business use case for an AI Agent that heavily utilizes "${toolType}". The use case should be different from the examples in the paper. Describe the business problem and how the agent solves it using this type of tool. Format the response cleanly using Markdown.`;
+            
+            const response = await callGemini(prompt);
+            outputDiv.innerHTML = response;
+        }
+
+        /**
+         * Copies the generated code to the clipboard.
+         * @param {HTMLElement} codeElement - The element containing the code to copy.
+         */
+        function copyCode(codeElement) {
+            const textToCopy = codeElement.innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+            alert('Code copied to clipboard!');
+        }
+
+        // --- Event Listeners ---
+
+        designAgentBtn.addEventListener('click', async () => {
+            const description = problemDescription.value;
+            if (!description.trim()) {
+                agentDesignOutput.textContent = "Please describe a problem first.";
+                agentDesignOutputContainer.classList.remove('hidden');
+                generateCodeBtn.classList.add('hidden');
+                starterCodeOutput.classList.add('hidden');
+                return;
+            }
+
+            agentDesignOutputContainer.classList.remove('hidden');
+            agentDesignOutput.innerHTML = '<div class="flex items-center justify-center"><div class="loader"></div><span class="ml-2 text-gray-600">Designing your agent...</span></div>';
+            generateCodeBtn.classList.add('hidden');
+            starterCodeOutput.classList.add('hidden');
+
+            const prompt = `Based on the OpenAI "A practical guide to building agents", design a high-level architecture for an AI agent that solves the following problem: "${description}".
+
+Your response should be in Markdown format and include these sections:
+- **Agent Goal:** A clear, one-sentence goal for the agent.
+- **Recommended Orchestration Pattern:** Suggest Single-Agent, Manager Pattern, or Decentralized Pattern, and justify the choice.
+- **Recommended Tools:** A list of recommended tools categorized as Data, Action, or Orchestration.
+- **Recommended Guardrails:** Suggest at least 3 critical guardrails for this agent.
+- **Example Interaction:** A short, sample dialogue between a user and the proposed agent.`;
+
+            const response = await callGemini(prompt);
+            agentDesignOutput.innerHTML = response;
+            generateCodeBtn.classList.remove('hidden');
+        });
+
+        generateCodeBtn.addEventListener('click', async () => {
+            const agentDesign = agentDesignOutput.innerText;
+            if (!agentDesign) return;
+
+            starterCodeOutput.classList.remove('hidden');
+            starterCodeOutput.innerHTML = '<div class="flex items-center justify-center"><div class="loader"></div><span class="ml-2 text-gray-600">Generating code...</span></div>';
+
+            const prompt = `Based on the following agent design from the OpenAI guide, generate starter Python code. Use standard libraries and define stub functions for any custom tools or APIs. The code should be well-commented and include placeholders like "YOUR_API_KEY". The code should be a single, complete Python script. Format the entire response inside a single Python code block. The agent design is as follows:\n\n${agentDesign}`;
+
+            const response = await callGemini(prompt);
+            const sanitizedCode = response.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            
+            // Create a wrapper for the pre tag to position the copy button
+            const preWrapper = document.createElement('div');
+            preWrapper.style.position = 'relative';
+
+            const preElement = document.createElement('pre');
+            const codeElement = document.createElement('code');
+            codeElement.innerHTML = sanitizedCode;
+            preElement.appendChild(codeElement);
+
+            const copyButton = document.createElement('button');
+            copyButton.innerText = 'Copy';
+            copyButton.className = 'copy-btn';
+            copyButton.onclick = () => {
+                copyCode(codeElement);
+                copyButton.innerText = 'Copied!';
+                setTimeout(() => { copyButton.innerText = 'Copy'; }, 2000);
+            };
+
+            preWrapper.appendChild(preElement);
+            preWrapper.appendChild(copyButton);
+            
+            starterCodeOutput.innerHTML = ''; // Clear loader
+            starterCodeOutput.appendChild(preWrapper);
+        });
+        
+        // --- Initial State ---
+        showInfo('model');
+    </script>
+</body>
+</html>
