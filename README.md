@@ -44,13 +44,13 @@ I built this tool to solve that problem. It's a bridge from concept to code, des
 
 ## 🌐 Live Demo
 
-👉 [https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/](https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME/)
+👉 [https://khanhaissam.github.io/guide-to-building-agents/](https://khanhaissam.github.io/guide-to-building-agents/)
 
 ## 🧪 How to Run This Project
 
 > No complex setup needed! This project is a single HTML file and runs entirely in the browser.
 
-1.  Clone the repository: `git clone https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME.git`
+1.  Clone the repository: `git clone https://github.com/khanhaissam/guide-to-building-agents.git`
 2.  Navigate to the project directory.
 3.  Open the `index.html` file in your preferred web browser.
 
